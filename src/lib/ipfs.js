@@ -38,16 +38,16 @@ async function getContent (ipfsNode, hash) {
       const pathStore = `${process.cwd()}/ipfs-data/` // Path to store new ipfs-data
       files.forEach(async file => {
         // Map files
-        console.log(file)
+      //  console.log(file)
         if (file.type === 'file') {
           // Is File
           fs.writeFile(`${pathStore}${file.path}`, file.content, err => {
-            if (err) console.log(err)
+           // if (err) console.log(err)
           })
         } else if (file.type === 'dir') {
           // Is Folder
           fs.mkdir(`${pathStore}${file.path}`, { recursive: true }, err => {
-            if (err) console.log(err)
+           // if (err) console.log(err)
           })
         }
       })

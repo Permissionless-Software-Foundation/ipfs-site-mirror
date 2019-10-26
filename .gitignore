@@ -65,3 +65,4 @@ util/ipfs-upload/*
 # This should come last. The specific files I *do* want to include.
 !ipfs-data/README.md
 !keys/README.md
+!util/ipfs-upload/README.md
