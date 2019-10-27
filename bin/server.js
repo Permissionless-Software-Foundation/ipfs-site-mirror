@@ -10,7 +10,9 @@ const logger = require('koa-logger')
 const mount = require('koa-mount')
 const serve = require('koa-static')
 const cors = require('kcors')
-const shell = require('shelljs')
+// const shell = require('shelljs')
+const ipfs = require('../src/lib/ipfs')
+const pRetry = require('p-retry')
 
 // App specific libraries.
 const config = require('../config')
@@ -22,7 +24,11 @@ const bch = new BCH()
 const util = require('util')
 util.inspect.defaultOptions = { depth: 1 }
 
-async function startServer () {
+
+const TIMEOUT = 1000;// Timeout to retry get hash
+const RETRIES = 5 // Amount retries to get hash
+
+async function startServer() {
   // Create a Koa instance.
   const app = new Koa()
 
@@ -43,34 +49,73 @@ async function startServer () {
   // MIDDLEWARE END
 
   // Retrieve hash from BCH network and retrieve data from IPFS.
+  // p-retry library -If it doesn't find the hash on the first try
+  let hash
+  try {
+    hash = await pRetry(find_hash, {
+      onFailedAttempt: async () => {
+        //   failed attempt.
+        sleep(TIMEOUT)
+      },
+      retries: RETRIES
+    })
+  } catch (error) {
+    // console.log(error)
+  }
 
-  // Get the latest hash off the BCH network.
-  const hash = await bch.findHash()
 
   // Exit if no hash is found.
   if (!hash) {
-    console.log(`Could not find IPFS hash associated with BCH address ${config.BCHADDR}`)
-    console.log(`Publish an IPFS hash using the memo-push tool before running this server.`)
-    // console.log(`Exiting`)
-    // process.exit()
+    console.log(
+      `Could not find IPFS hash associated with BCH address ${config.BCHADDR}`
+    )
+    console.log(
+      `Publish an IPFS hash using the memo-push tool before running this server.`
+    )
+    console.log(`Exiting`)
+    process.exit()
   }
 
-  console.log(`Retrieving and serving this IPFS hash: ${hash}`)
+  // Start IPFS
+  const ipfsNode = await ipfs.startIPFS()
 
-  // Get the content from the IPFS network.
-  shell.cd(`ipfs-data`)
-  shell.exec(`ipfs get ${hash}`)
-  shell.exec(`ipfs pin add ${hash}`)
+  // For ipfs Ready
+  ipfsNode.on('ready', async () => {
+    console.log(`Retrieving and serving this IPFS hash: ${hash}`)
 
-  // Mount the downloaded directory and serve it.
-  app.use(convert(mount('/', serve(`${process.cwd()}/${hash}`))))
+    // Bootstrap connection (for development purposes)
+    // Replace the multiaddr below with the IPFS node running on your local machine.
+    // await ipfsNode.swarm.connect('/ip4/127.0.0.1/tcp/4001/ipfs/QmSgDzV1GeTg1tx4wU5WKjxMvT692xvt8FS14JdoDEgFjj')
 
-  await app.listen(config.port)
-  console.log(`Server started on ${config.port}`)
-  console.log(`Access website at http://localhost:${config.port}/`)
+    // Get the latest content from the IPFS network and Add into ipfs-data.
+    await ipfs.getContent(ipfsNode, hash)
+    console.log(`Updated content.!`)
+    // Adds an IPFS object to the pinset and also stores it to the IPFS repo.
+    ipfs.pinAdd(ipfsNode, hash)
 
-  return app
+    // Mount the downloaded directory and serve it.
+    app.use(convert(mount('/', serve(`${process.cwd()}/ipfs-data/${hash}`))))
+    await app.listen(config.port)
+    console.log(`Server started on ${config.port}`)
+    console.log(`Access website at http://localhost:${config.port}/`)
+
+    return app
+  })
 }
+const sleep = async (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+// Get the latest hash off the BCH network.
+const find_hash = async () => {
+  console.log(`Trying get hash`)
+  const hash = await bch.findHash()
+  if (!hash) {
+    throw new Error()
+  } else {
+    return hash
+  }
+}
+
 // startServer()
 
 module.exports = {
