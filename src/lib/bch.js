@@ -81,7 +81,7 @@ class BCH {
 
             const hash = this.filterHash(msg)
             if (hash) {
-              // console.log(`Hash found! ${hash}`)
+             //  console.log(`Hash found! ${hash}`)
               return hash
             }
           }

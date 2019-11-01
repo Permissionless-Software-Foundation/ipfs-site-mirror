@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node restart-server.js",
-    "test": "KOA_ENV=test nyc --reporter=text ./node_modules/.bin/mocha --exit",
+    "test": "KOA_ENV=test nyc --reporter=text --timeout 15000 mocha test/unit/",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "coverage:report": "nyc --reporter=html mocha --exit"
   },
@@ -52,7 +52,8 @@
     "eslint-plugin-standard": "^4.0.0",
     "mocha": "^6.1.3",
     "nyc": "^14.0.0",
-    "semantic-release": "^15.13.24"
+    "semantic-release": "^15.13.24",
+    "sinon": "^7.5.0"
   },
   "release": {
     "publish": [
