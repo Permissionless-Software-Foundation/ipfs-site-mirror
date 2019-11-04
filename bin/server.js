@@ -12,7 +12,7 @@ const serve = require('koa-static')
 const cors = require('kcors')
 // const shell = require('shelljs')
 const ipfs = require('../src/lib/ipfs')
-const pRetry = require('p-retry')
+
 
 // App specific libraries.
 const config = require('../config')
@@ -20,13 +20,13 @@ const errorMiddleware = require('../src/middleware')
 const BCH = require(`../src/lib/bch`)
 const bch = new BCH()
 
+const STATE = require(`../src/lib/state`)
+const state = new STATE()
 // Used for debugging and iterrogating JS objects.
 const util = require('util')
 util.inspect.defaultOptions = { depth: 1 }
 
 
-const TIMEOUT = 1000;// Timeout to retry get hash
-const RETRIES = 5 // Amount retries to get hash
 
 async function startServer() {
   // Create a Koa instance.
@@ -50,19 +50,7 @@ async function startServer() {
 
   // Retrieve hash from BCH network and retrieve data from IPFS.
   // p-retry library -If it doesn't find the hash on the first try
-  let hash
-  try {
-    hash = await pRetry(find_hash, {
-      onFailedAttempt: async () => {
-        //   failed attempt.
-        sleep(TIMEOUT)
-      },
-      retries: RETRIES
-    })
-  } catch (error) {
-    // console.log(error)
-  }
-
+  let hash = await bch.pRetryGetHash() 
 
   // Exit if no hash is found.
   if (!hash) {
@@ -75,7 +63,7 @@ async function startServer() {
     console.log(`Exiting`)
     process.exit()
   }
-
+  await state.setLastHash(hash)
   // Start IPFS
   const ipfsNode = await ipfs.startIPFS()
 
@@ -102,22 +90,10 @@ async function startServer() {
     return app
   })
 }
-const sleep = async (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-// Get the latest hash off the BCH network.
-const find_hash = async () => {
-  console.log(`Trying get hash`)
-  const hash = await bch.findHash()
-  if (!hash) {
-    throw new Error()
-  } else {
-    return hash
-  }
-}
-
 // startServer()
 
 module.exports = {
   startServer
 }
+
+
