@@ -10,33 +10,35 @@
 const config = require('../../config')
 const pRetry = require('p-retry')
 
-const BITBOX = new config.BCHLIB({ restURL: config.MAINNET_REST })
+
+const bchjs = new config.BCHLIB({ restURL: config.MAINNET_REST })
 
 const ADDR = config.BCHADDR
 
 
 const TIMEOUT = 1000;// Timeout to retry get hash
 const RETRIES = 5 // Amount retries to get hash
-
+let _this
 class BCH {
   constructor(hash) {
+    _this = this
     // By default make hash an empty string.
-    this.currentHash = ''
+    _this.currentHash = ''
 
     // If user specified a hash to use, use that.
-    if (hash && hash !== '') this.currentHash = hash
+    if (hash && hash !== '') _this.currentHash = hash
   }
 
   // Checks to see if a new hash been published to the BCH network. If a new
   // hash is detected, it returns the hash. Otherwise, it returns false.
   async checkForUpdates() {
-    const hash = await this.findHash()
+    const hash = await _this.findHash()
 
     // Handle initializing the server.
-    if (this.currentHash === '') this.currentHash = hash
+    if (_this.currentHash === '') _this.currentHash = hash
 
     // If new hash is detected.
-    if (hash !== this.currentHash) {
+    if (hash !== _this.currentHash) {
       this.currentHash = hash
 
       return hash
@@ -50,18 +52,18 @@ class BCH {
   async findHash() {
     try {
       // Get details associated with this apps BCH address.
-      const details = await BITBOX.Address.details(ADDR)
+      const details = await bchjs.Blockbook.balance(ADDR)
       console.log(`Retrieving transaction history for BCH address ${ADDR}`)
 
       // Extract the list of transaction IDs involving this address.
-      const TXIDs = details.transactions
+      const TXIDs = details.txids
       // console.log(`TXIDs: ${JSON.stringify(TXIDs, null, 2)}`)
 
       // Loop through each transaction associated with this address.
       for (let i = 0; i < TXIDs.length; i++) {
         const thisTXID = TXIDs[i]
 
-        const thisTx = await BITBOX.RawTransactions.getRawTransaction(
+        const thisTx = await bchjs.RawTransactions.getRawTransaction(
           thisTXID,
           true
         )
@@ -75,13 +77,13 @@ class BCH {
           const asm = thisVout.scriptPubKey.asm
           // console.log(`asm: ${asm}`)
 
-          const msg = this.decodeTransaction(asm)
+          const msg = _this.decodeTransaction(asm)
           if (msg) {
             // console.log(`msg: ${msg}`)
 
-            const hash = this.filterHash(msg)
+            const hash = _this.filterHash(msg)
             if (hash) {
-             //  console.log(`Hash found! ${hash}`)
+              //  console.log(`Hash found! ${hash}`)
               return hash
             }
           }
@@ -120,8 +122,8 @@ class BCH {
   decodeTransaction(asm) {
     try {
       // Decode the assembly into a string.
-      let fromASM = BITBOX.Script.fromASM(asm)
-      let decodedArr = BITBOX.Script.decode(fromASM).toString()
+      let fromASM = bchjs.Script.fromASM(asm)
+      let decodedArr = bchjs.Script.decode(fromASM).toString()
       // console.log(`decodedArr: ${util.inspect(decodedArr)}`)
 
       // Split the string based on commas.
@@ -151,7 +153,7 @@ class BCH {
       const hash = await pRetry(tryFindHash, {
         onFailedAttempt: async () => {
           //   failed attempt.
-          this.sleep(TIMEOUT)
+          _this.sleep(TIMEOUT)
         },
         retries: RETRIES
       })
