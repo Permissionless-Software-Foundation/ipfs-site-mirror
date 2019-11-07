@@ -15,16 +15,21 @@ const bchjs = new config.BCHLIB({ restURL: config.MAINNET_REST })
 
 const ADDR = config.BCHADDR
 
+const STATE = require(`./state`)
+const state = new STATE()
 
 const TIMEOUT = 1000;// Timeout to retry get hash
-const RETRIES = 5 // Amount retries to get hash
+//const RETRIES = 1 // Amount retries to get hash
 let _this
 class BCH {
-  constructor(hash) {
+  constructor(hash , retries) {
+    this.bchjs = bchjs
     _this = this
     // By default make hash an empty string.
     _this.currentHash = ''
-
+    _this.retries = 5 //Amount retries to get hash
+    
+    if(retries  && retries > 0) _this.retries = retries
     // If user specified a hash to use, use that.
     if (hash && hash !== '') _this.currentHash = hash
   }
@@ -52,9 +57,8 @@ class BCH {
   async findHash() {
     try {
       // Get details associated with this apps BCH address.
-      const details = await bchjs.Blockbook.balance(ADDR)
+      const details = await _this.bchjs.Blockbook.balance(ADDR)
       console.log(`Retrieving transaction history for BCH address ${ADDR}`)
-
       // Extract the list of transaction IDs involving this address.
       const TXIDs = details.txids
       // console.log(`TXIDs: ${JSON.stringify(TXIDs, null, 2)}`)
@@ -63,16 +67,14 @@ class BCH {
       for (let i = 0; i < TXIDs.length; i++) {
         const thisTXID = TXIDs[i]
 
-        const thisTx = await bchjs.RawTransactions.getRawTransaction(
+        const thisTx = await _this.bchjs.RawTransactions.getRawTransaction(
           thisTXID,
           true
         )
         // console.log(`thisTx: ${JSON.stringify(thisTx, null, 2)}`)
-
         // Loop through all the vout entries.
         for (let j = 0; j < thisTx.vout.length; j++) {
           const thisVout = thisTx.vout[j]
-
           // Assembly representation.
           const asm = thisVout.scriptPubKey.asm
           // console.log(`asm: ${asm}`)
@@ -122,8 +124,8 @@ class BCH {
   decodeTransaction(asm) {
     try {
       // Decode the assembly into a string.
-      let fromASM = bchjs.Script.fromASM(asm)
-      let decodedArr = bchjs.Script.decode(fromASM).toString()
+      let fromASM = _this.bchjs.Script.fromASM(asm)
+      let decodedArr = _this.bchjs.Script.decode(fromASM).toString()
       // console.log(`decodedArr: ${util.inspect(decodedArr)}`)
 
       // Split the string based on commas.
@@ -149,17 +151,30 @@ class BCH {
   }
   // Retries to get hash
   async pRetryGetHash() {
+
+    let hash = await _this.getHashFromState()
     try {
-      const hash = await pRetry(tryFindHash, {
+      hash = await pRetry(tryFindHash, {
         onFailedAttempt: async () => {
           //   failed attempt.
           _this.sleep(TIMEOUT)
         },
-        retries: RETRIES
+        retries: _this.retries
       })
+      await state.setLastHash(hash)
       return hash
     } catch (error) {
+      if (hash) console.log(`Hash not found, setting the lash hash used : ${hash}`)
+      return hash
       // console.log(error)
+    }
+  }
+  async getHashFromState() {
+    try {
+      const lasth = await state.getLastHash()
+      return lasth
+    } catch (error) {
+      return null
     }
   }
 

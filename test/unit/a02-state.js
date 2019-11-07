@@ -22,7 +22,6 @@ const deleteState = () => {
   try {
     // Delete state if exist
     fs.unlinkSync('config/state-test.json')
-    console.log("state-test.json deleted")
   } catch (error) {
 
   }
@@ -31,7 +30,7 @@ describe("#state.js", () => {
   // Delete state-test.json before starting unit test
   before(() => { deleteState() });
 
-  describe("#setLastHash", () => {
+  describe("setLastHash function", () => {
     it("should throw error if hash is not a string", async () => {
       try {
         const hash = 1234
@@ -77,4 +76,24 @@ describe("#state.js", () => {
     });
 
   });
+  describe("getLastHash function", () => {
+    it("should get lasthash from  state.json if it exist", async () => {
+
+      try {
+        const lastState = await stateLib.getLastHash();
+        assert.isString(lastState)
+
+      } catch (err) {
+        assert.include(err.message, `'state.json not found!'`)
+      }
+    });
+    it("should trhow error if state.json does not exist", async () => {
+      deleteState()
+      try {
+        await stateLib.getLastHash();
+      } catch (err) {
+        assert.include(err.message, 'not found!')
+      }
+    });
+  })
 });

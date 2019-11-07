@@ -9,7 +9,6 @@ let _this
 
 class STATE {
     constructor() {
-        console.log(JSON_FILE)
         // Get last state if exist
         try {
             require.resolve(`../../config/${JSON_FILE}`) //verify if exist state.json
@@ -39,6 +38,16 @@ class STATE {
             throw new Error('Error trying to write state json')
       
         }
+    }
+    async getLastHash(){
+        try {
+            const lastHash = await jsonFiles.readJSON(JSON_PATH)
+            if(!lastHash.lastHash) throw  new Error('lastHash not found')
+            return lastHash.lastHash
+        } catch (error) {
+            throw  new Error('state.json not found!')
+        }
+        console.log(lastHash)
     }
 }
 module.exports = STATE
