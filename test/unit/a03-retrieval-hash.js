@@ -3,86 +3,79 @@
 */
 
 // npm libraries
-const chai = require("chai");
-const sinon = require("sinon");
+const chai = require('chai')
+const sinon = require('sinon')
 // Locally global variables.
-const assert = chai.assert;
+const assert = chai.assert
 
 // Mocking data libraries.
-const mockData = require("./mocks/hash-mocks");
+const mockData = require('./mocks/hash-mocks')
 
 // Unit under test
-const BCHJS = require("../../src/lib/bch");
-const bchjs = new BCHJS(null, 1);
+const BCHJS = require('../../src/lib/bch')
+const bchjs = new BCHJS(null, 1)
 
 const STATE = require('../../src/lib/state')
 const state = new STATE()
 
-describe("#bch.js", () => {
-  let sandbox;
+describe('#bch.js', () => {
+  let sandbox
   // Restore the sandbox before each test.
-  before(async ()=>{
-    //create state.-test.json
-    const hash = "QmRsy3diLrXTTMFD1D7yYyY1dRnkVzSW9ugPVnnueZdOYT";
-    await state.setLastHash(hash);
+  before(async () => {
+    // create state.-test.json
+    const hash = 'QmRsy3diLrXTTMFD1D7yYyY1dRnkVzSW9ugPVnnueZdOYT'
+    await state.setLastHash(hash)
   })
-  beforeEach(() => (sandbox = sinon.createSandbox()));
-  afterEach(() => sandbox.restore());
+  beforeEach(() => (sandbox = sinon.createSandbox()))
+  afterEach(() => sandbox.restore())
 
-  describe("findHash function", () => {
-    it("Should retrieve hash", async () => {
+  describe('findHash function', () => {
+    it('Should retrieve hash', async () => {
+      sandbox
+        .stub(bchjs.bchjs.Blockbook, 'balance')
+        .resolves(mockData.mockDetails)
 
       sandbox
-        .stub(bchjs.bchjs.Blockbook, "balance")
-        .resolves(mockData.mockDetails);
+        .stub(bchjs.bchjs.RawTransactions, 'getRawTransaction')
+        .resolves(mockData.mockThitx)
 
-      sandbox
-        .stub(bchjs.bchjs.RawTransactions, "getRawTransaction")
-        .resolves(mockData.mockThitx);
-
-      const hash = await bchjs.findHash();
+      const hash = await bchjs.findHash()
       console.log(hash)
 
-      assert.isString(hash);
-
-
+      assert.isString(hash)
     })
-  });
-  describe("pRetryGetHash function", async function () {
-    this.timeout(20000);
-    it("Should use last hash from state.json if it exist", async () => {
+  })
 
-      sandbox
-        .stub(bchjs.bchjs.Blockbook, "balance")
-        .resolves({}); // mocks empty  for trhow error
-
+  describe('pRetryGetHash function', async function () {
+    this.timeout(20000)
+    it('Should use last hash from state.json if it exist', async () => {
+      sandbox.stub(bchjs.bchjs.Blockbook, 'balance').resolves({}) // mocks empty  for trhow error
 
       const lastHash = await state.getLastHash()
-      const hash = await bchjs.pRetryGetHash();
+      const hash = await bchjs.pRetryGetHash()
 
       assert.isString(hash)
       assert.isString(lastHash)
       assert.equal(lastHash, hash)
     })
 
-    it("Should Retrieve hash from pretry function", async () => {
+    it('Should Retrieve hash from pretry function', async () => {
       sandbox
-        .stub(bchjs.bchjs.Blockbook, "balance")
-        .resolves(mockData.mockDetails);
+        .stub(bchjs.bchjs.Blockbook, 'balance')
+        .resolves(mockData.mockDetails)
 
       sandbox
-        .stub(bchjs.bchjs.RawTransactions, "getRawTransaction")
-        .resolves(mockData.mockThitx);
+        .stub(bchjs.bchjs.RawTransactions, 'getRawTransaction')
+        .resolves(mockData.mockThitx)
 
-      lastHash = await state.getLastHash()
+      const lastHash = await state.getLastHash()
       console.log(lastHash)
-      const hash = await bchjs.pRetryGetHash();
+      const hash = await bchjs.pRetryGetHash()
       console.log(hash)
 
       assert.isString(hash)
       assert.isString(lastHash)
       assert.notEqual(lastHash, hash)
-
     })
-  });
-});
+  })
+})

@@ -10,7 +10,6 @@
 const config = require('../../config')
 const pRetry = require('p-retry')
 
-
 const bchjs = new config.BCHLIB({ restURL: config.MAINNET_REST })
 
 const ADDR = config.BCHADDR
@@ -18,25 +17,25 @@ const ADDR = config.BCHADDR
 const STATE = require(`./state`)
 const state = new STATE()
 
-const TIMEOUT = 1000;// Timeout to retry get hash
-//const RETRIES = 1 // Amount retries to get hash
+const TIMEOUT = 1000 // Timeout to retry get hash
+// const RETRIES = 1 // Amount retries to get hash
 let _this
 class BCH {
-  constructor(hash , retries) {
+  constructor (hash, retries) {
     this.bchjs = bchjs
     _this = this
     // By default make hash an empty string.
     _this.currentHash = ''
-    _this.retries = 5 //Amount retries to get hash
-    
-    if(retries  && retries > 0) _this.retries = retries
+    _this.retries = 5 // Amount retries to get hash
+
+    if (retries && retries > 0) _this.retries = retries
     // If user specified a hash to use, use that.
     if (hash && hash !== '') _this.currentHash = hash
   }
 
   // Checks to see if a new hash been published to the BCH network. If a new
   // hash is detected, it returns the hash. Otherwise, it returns false.
-  async checkForUpdates() {
+  async checkForUpdates () {
     const hash = await _this.findHash()
 
     // Handle initializing the server.
@@ -54,7 +53,7 @@ class BCH {
 
   // Walk the transactions associated with an address until a proper IPFS hash is
   // found. If one is not found, will return false.
-  async findHash() {
+  async findHash () {
     try {
       // Get details associated with this apps BCH address.
       const details = await _this.bchjs.Blockbook.balance(ADDR)
@@ -101,7 +100,7 @@ class BCH {
   // Filters a string to see if it matches the proper pattern of:
   // 'IPFS UPDATE <hash>'
   // Returns the hash if the pattern matches. Otherwise, returns false.
-  filterHash(msg) {
+  filterHash (msg) {
     try {
       if (msg.indexOf('IPFS UPDATE') > -1) {
         const parts = msg.split(' ')
@@ -121,7 +120,7 @@ class BCH {
 
   // Decodes BCH transaction assembly code. If it matches the memo.cash
   // protocol for posts, it returns the post message. Otherwise returns false.
-  decodeTransaction(asm) {
+  decodeTransaction (asm) {
     try {
       // Decode the assembly into a string.
       let fromASM = _this.bchjs.Script.fromASM(asm)
@@ -150,8 +149,7 @@ class BCH {
     }
   }
   // Retries to get hash
-  async pRetryGetHash() {
-
+  async pRetryGetHash () {
     let hash = await _this.getHashFromState()
     try {
       hash = await pRetry(tryFindHash, {
@@ -164,12 +162,12 @@ class BCH {
       await state.setLastHash(hash)
       return hash
     } catch (error) {
-      if (hash) console.log(`Hash not found, setting the lash hash used : ${hash}`)
+      if (hash) { console.log(`Hash not found, setting the lash hash used : ${hash}`) }
       return hash
       // console.log(error)
     }
   }
-  async getHashFromState() {
+  async getHashFromState () {
     try {
       const lasth = await state.getLastHash()
       return lasth
@@ -178,11 +176,9 @@ class BCH {
     }
   }
 
-
-  sleep(ms) {
+  sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
-
 }
 
 // Try get the latest hash off the BCH network.
@@ -196,6 +192,5 @@ const tryFindHash = async () => {
     return hash
   }
 }
-
 
 module.exports = BCH
