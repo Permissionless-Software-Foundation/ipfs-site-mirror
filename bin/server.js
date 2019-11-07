@@ -20,8 +20,6 @@ const errorMiddleware = require('../src/middleware')
 const BCH = require(`../src/lib/bch`)
 const bch = new BCH()
 
-const STATE = require(`../src/lib/state`)
-const state = new STATE()
 // Used for debugging and iterrogating JS objects.
 const util = require('util')
 util.inspect.defaultOptions = { depth: 1 }
@@ -63,7 +61,7 @@ async function startServer() {
     console.log(`Exiting`)
     process.exit()
   }
-  await state.setLastHash(hash)
+
   // Start IPFS
   const ipfsNode = await ipfs.startIPFS()
 

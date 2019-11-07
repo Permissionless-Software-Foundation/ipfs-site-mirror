@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node restart-server.js",
     "test": "KOA_ENV=test nyc --reporter=text --timeout 15000 mocha test/unit/",
+    "test:integration": "KOA_ENV=test nyc --reporter=text --timeout 15000 mocha test/integration/",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "coverage:report": "nyc --reporter=html mocha --exit"
   },
@@ -36,9 +37,9 @@
     "koa-mount": "^4.0.0",
     "koa-router": "^7.0.1",
     "koa-static": "^5.0.0",
+    "p-retry": "^4.1.0",
     "shelljs": "^0.8.3",
-    "tree-kill": "^1.2.1",
-    "p-retry": "^4.1.0"
+    "tree-kill": "^1.2.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",
