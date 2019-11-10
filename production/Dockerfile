@@ -23,9 +23,9 @@ RUN echo 'abcd8765' | sudo -S pwd
 WORKDIR /home/safeuser
 
 # x86
-RUN wget https://dist.ipfs.io/go-ipfs/v0.4.22/go-ipfs_v0.4.22_linux-amd64.tar.gz
-RUN tar -xvf go-ipfs_v0.4.22_linux-amd64.tar.gz
-RUN rm go-ipfs_v0.4.22_linux-amd64.tar.gz
+#RUN wget https://dist.ipfs.io/go-ipfs/v0.4.22/go-ipfs_v0.4.22_linux-amd64.tar.gz
+#RUN tar -xvf go-ipfs_v0.4.22_linux-amd64.tar.gz
+#RUN rm go-ipfs_v0.4.22_linux-amd64.tar.gz
 
 # ARM & Raspberry Pi
 #RUN wget https://dist.ipfs.io/go-ipfs/v0.4.20/go-ipfs_v0.4.20_linux-arm.tar.gz
@@ -33,8 +33,8 @@ RUN rm go-ipfs_v0.4.22_linux-amd64.tar.gz
 #RUN rm go-ipfs_v0.4.20_linux-arm.tar.gz
 
 # Install IPFS
-WORKDIR /home/safeuser/go-ipfs
-RUN sudo ./install.sh
+#WORKDIR /home/safeuser/go-ipfs
+#RUN sudo ./install.sh
 
 # Clone the project.
 WORKDIR /home/safeuser

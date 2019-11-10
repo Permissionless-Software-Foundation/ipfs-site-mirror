@@ -4,19 +4,19 @@
 source ~/.profile
 
 # Initialize the IPFS user if it hasn't been initialized yet.
-ipfs init
+#ipfs init
 
-sleep 5
+#sleep 5
 
 # Start the IPFS daemon.
-nohup ipfs daemon &
+#nohup ipfs daemon &
 
-sleep 20
+#sleep 20
 
 # Display the IPFS peer id and info on the console.
-ipfs id
+#ipfs id
 
-sleep 10
+#sleep 10
 
 # I'm hoping to be able to remove these commands.
 # Add any existing data. Help speed up startup.
