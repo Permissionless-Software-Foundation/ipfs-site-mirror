@@ -8,25 +8,26 @@
 'use strict'
 
 // By default choose a local rest API.
-let RESTAPI = "bchjs"
+let RESTAPI = 'bchjs'
 
 // Override the RESTAPI setting if envronment variable is set.
-if (process.env.RESTAPI && process.env.RESTAPI !== '') { RESTAPI = process.env.RESTAPI }
+if (process.env.RESTAPI && process.env.RESTAPI !== '') {
+  RESTAPI = process.env.RESTAPI
+}
 
 // Ensure bch-js can pick up the env var.
 process.env.RESTAPI = RESTAPI
 
 const BCHJS = require('@chris.troutner/bch-js')
 
-
 const config = {}
 
 // Use bch-js but use it with the bitcoin.com infrastructure.
-if (RESTAPI === "bchjs") {
+if (RESTAPI === 'bchjs') {
   config.BCHLIB = BCHJS
   config.MAINNET_REST = `https://mainnet.bchjs.cash/v3/`
   config.TESTNET_REST = `https://testnet.bchjs.cash/v3/`
-  config.RESTAPI = "bchjs"
+  config.RESTAPI = 'bchjs'
 }
 
 // Use bch-js with local infrastructure.

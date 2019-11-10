@@ -1,5 +1,5 @@
 /*
-  Unit tests for the util.js utility library.
+  Unit tests
 */
 
 // npm libraries
@@ -24,6 +24,7 @@ const deleteState = () => {
     fs.unlinkSync('config/state-test.json')
   } catch (error) {}
 }
+
 describe('#state.js', () => {
   // Delete state-test.json before starting unit test
   before(() => {
@@ -54,6 +55,7 @@ describe('#state.js', () => {
         assert.include(err.message, `Hash is required`)
       }
     })
+
     it('should create state.json if it doesnt exist', async () => {
       try {
         const hash = 'QmRsy3diLrXTTMFD1D7yYyY1dRnkVzSW9ugPVnnueZdPPQ'
@@ -63,6 +65,7 @@ describe('#state.js', () => {
         assert.include(err.message, `'unexpected result'`)
       }
     })
+
     it('should update state.json if it exist', async () => {
       try {
         const hash = 'QmRsy3diLrXTTMFD1D7yYyY1dRnkVzSW9ugPVnnueZdOYT'
@@ -73,6 +76,7 @@ describe('#state.js', () => {
       }
     })
   })
+
   describe('getLastHash function', () => {
     it('should get lasthash from  state.json if it exist', async () => {
       try {
@@ -82,6 +86,7 @@ describe('#state.js', () => {
         assert.include(err.message, `'state.json not found!'`)
       }
     })
+
     it('should throw error if state.json does not exist', async () => {
       deleteState()
       try {
