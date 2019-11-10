@@ -22,29 +22,11 @@ RUN echo 'abcd8765' | sudo -S pwd
 #VOLUME /home/safeuser/.ipfs
 WORKDIR /home/safeuser
 
-# x86
-#RUN wget https://dist.ipfs.io/go-ipfs/v0.4.22/go-ipfs_v0.4.22_linux-amd64.tar.gz
-#RUN tar -xvf go-ipfs_v0.4.22_linux-amd64.tar.gz
-#RUN rm go-ipfs_v0.4.22_linux-amd64.tar.gz
-
-# ARM & Raspberry Pi
-#RUN wget https://dist.ipfs.io/go-ipfs/v0.4.20/go-ipfs_v0.4.20_linux-arm.tar.gz
-#RUN tar -xvf go-ipfs_v0.4.20_linux-arm.tar.gz
-#RUN rm go-ipfs_v0.4.20_linux-arm.tar.gz
-
-# Install IPFS
-#WORKDIR /home/safeuser/go-ipfs
-#RUN sudo ./install.sh
-
 # Clone the project.
 WORKDIR /home/safeuser
 RUN git clone https://github.com/Permissionless-Software-Foundation/ipfs-web-server
 WORKDIR /home/safeuser/ipfs-web-server
 #RUN git checkout unstable
-
-# Copy the config file, which determins the internal port and the BCH address
-# to monitor.
-COPY common.js config/env/common.js
 
 # Install dependencies
 RUN npm install
@@ -57,6 +39,10 @@ VOLUME /home/safeuser/ipfs-web-server/ipfs-data
 
 # IPFS port
 EXPOSE 4001
+
+# Copy the config file, which determins the internal port and the BCH address
+# to monitor.
+COPY common.js config/env/common.js
 
 # Debug
 #WORKDIR /home/safeuser
