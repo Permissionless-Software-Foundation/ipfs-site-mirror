@@ -1,3 +1,12 @@
+/*
+  This library is used to manage the state of the app. State is managed with
+  a JSON file. The file is opened at the start of the app and updated
+  periodically as the app runs.
+
+  The primary use of the state is to save the last IPFS hash used to retrieve
+  the website, in case there are issues connecting to the BCH infrastructure.
+*/
+
 const jsonFiles = require('./utils/json-files')
 const config = require('../../config')
 const JSON_FILE = config.stateFileName
@@ -38,6 +47,7 @@ class STATE {
     }
   }
 
+  // get the last hash saved to the state file.
   async getLastHash () {
     try {
       const lastHash = await jsonFiles.readJSON(JSON_PATH)
