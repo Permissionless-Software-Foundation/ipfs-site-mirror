@@ -8,7 +8,7 @@ troutsblog:
     - "3210:3210"  # <host port>:<container port>
     - "4231:4002"  # IPFS
   volumes:
-    - ./ipfs-data:/home/safeuser/koa-ipfs-blog/ipfs-data
+    - ./ipfs-data:/home/safeuser/ipfs-web-server/ipfs-data
   restart: always
 
 tor:
