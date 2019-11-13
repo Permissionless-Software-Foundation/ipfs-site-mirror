@@ -23,36 +23,39 @@ util.inspect.defaultOptions = { depth: 1 }
 
 // Start the IPFS blog web server. Restart it if a new hash is published to the
 // BCH network.
+let localStorage
+let pid
+// init local storage
+if (typeof localStorage === 'undefined' || localStorage === null) {
+  const LocalStorage = require('node-localstorage').LocalStorage
+  localStorage = new LocalStorage('./localStorage')
+  localStorage.setItem('ipfsDownloading', false)
+}
+
 async function manageServer () {
   try {
     // Start the web server.
     const server = shell.exec('node index.js', { async: true })
-    let pid = server.pid
+    pid = server.pid
     // console.log(`server : ${util.inspect(server)}`)
     // console.log(`pid: ${server.pid}`)
 
-    setInterval(async function () {
-      console.log(`Checking for updates...`)
+    let serverInterval = setInterval(initServer, PERIOD)
 
-      // Check for updates. Will usually return false.
-      const hash = await bch.checkForUpdates(pid)
-      if (!hash) {
-        console.log(`No updates found.`)
-        console.log(` `)
+    // Checking if IPFS is downloading new content
+    setInterval(() => {
+      if (serverInterval && localStorage.getItem('ipfsDownloading') === 'true') {
+        console.log('Update Interval Stopped')
+        console.log('Downloading new content')
+        clearInterval(serverInterval)
+        serverInterval = null
+        // console.log(serverInterval)
+      } else if (serverInterval === null && localStorage.getItem('ipfsDownloading') !== 'true') {
+        console.log('IPFS Download finished..!')
+        console.log('Resuming update interval')
+        serverInterval = setInterval(initServer, PERIOD)
       }
-
-      // If a hash is returned, then restart the web server.
-      if (hash) {
-        console.log(`New content published with hash ${hash}`)
-        console.log('Restarting server...')
-        kill(pid)
-
-        await sleep(5000)
-
-        const server = shell.exec('node index.js', { async: true })
-        pid = server.pid
-      }
-    }, PERIOD)
+    }, 1000)
   } catch (err) {
     console.error(err)
   }
@@ -62,4 +65,26 @@ manageServer()
 // Promise based sleep function:
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function initServer () {
+  console.log(`Checking for updates...`)
+  // Check for updates. Will usually return false.
+  const hash = await bch.checkForUpdates(pid)
+  if (!hash) {
+    console.log(`No updates found.`)
+    console.log(` `)
+  }
+
+  // If a hash is returned, then restart the web server.
+  if (hash) {
+    console.log(`New content published with hash ${hash}`)
+    console.log('Restarting server...')
+    kill(pid)
+
+    await sleep(5000)
+
+    const server = shell.exec('node index.js', { async: true })
+    pid = server.pid
+  }
 }

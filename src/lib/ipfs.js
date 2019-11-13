@@ -1,8 +1,14 @@
 const IPFS = require('ipfs')
 const fs = require('fs')
 const config = require('../../config')
-let ipfs
 
+let ipfs
+let localStorage
+// init local storage
+if (typeof localStorage === 'undefined' || localStorage === null) {
+  const LocalStorage = require('node-localstorage').LocalStorage
+  localStorage = new LocalStorage('./localStorage')
+}
 async function startIPFS () {
   // starting ipfs node
   console.log('Starting...!')
@@ -20,7 +26,7 @@ async function startIPFS () {
     }
   }
   if (config.ipfsPort1 && typeof config.ipfsPort1 === 'number' &&
-    config.ipfsPort2 && typeof config.ipfsPort2 === 'number') {
+  config.ipfsPort2 && typeof config.ipfsPort2 === 'number') {
     // Adding ports to ipfs config
     ipfsOptions.config = {
       Addresses: {
@@ -40,10 +46,14 @@ async function startIPFS () {
 
 // Get the latest content from the IPFS network and Add into ipfs-data.
 async function getContent (ipfsNode, hash) {
+  localStorage.setItem('ipfsDownloading', true)
   // Get the latest content from the IPFS network.
   return new Promise((resolve, reject) => {
     ipfsNode.get(hash, async function (err, files) {
-      if (err) reject(err)
+      if (err) {
+        localStorage.setItem('ipfsDownloading', false)
+        reject(err)
+      }
 
       const pathStore = `${process.cwd()}/ipfs-data/` // Path to store new ipfs-data
       files.forEach(async file => {
@@ -51,16 +61,13 @@ async function getContent (ipfsNode, hash) {
         //  console.log(file)
         if (file.type === 'file') {
           // Is File
-          fs.writeFile(`${pathStore}${file.path}`, file.content, err => {
-            if (err) console.log(err)
-          })
+          fs.writeFileSync(`${pathStore}${file.path}`, file.content)
         } else if (file.type === 'dir') {
           // Is Folder
-          fs.mkdir(`${pathStore}${file.path}`, { recursive: true }, err => {
-            if (err) console.log(err)
-          })
+          fs.mkdirSync(`${pathStore}${file.path}`, { recursive: true })
         }
       })
+      localStorage.setItem('ipfsDownloading', false)
       resolve(true)
     })
   })
