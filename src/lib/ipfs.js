@@ -1,30 +1,40 @@
 const IPFS = require('ipfs')
 const fs = require('fs')
+const config = require('../../config')
 let ipfs
 
 async function startIPFS () {
   // starting ipfs node
   console.log('Starting...!')
-  ipfs = new IPFS({
+  const ipfsOptions = {
     repo: './ipfs-data/ipfs-config/node',
     start: true,
     EXPERIMENTAL: {
       pubsub: true
     },
-    // config: {
-    //   Addresses: {
-    //     Swarm: ["/ip4/0.0.0.0/tcp/8006", "/ip4/127.0.0.1/tcp/8007/ws"],
-    //     API: "/ip4/127.0.0.1/tcp/8008",
-    //     Gateway: "/ip4/127.0.0.1/tcp/8009"
-    //   }
-    // },
     relay: {
       enabled: true, // enable circuit relay dialer and listener
       hop: {
         enabled: true // enable circuit relay HOP (make this node a relay)
       }
     }
-  })
+  }
+  if (config.ipfsPort1 && typeof config.ipfsPort1 === 'number' &&
+    config.ipfsPort2 && typeof config.ipfsPort2 === 'number') {
+    // Adding ports to ipfs config
+    ipfsOptions.config = {
+      Addresses: {
+        Swarm: [
+          `/ip4/0.0.0.0/tcp/${config.ipfsPort1}`,
+          `/ip4/127.0.0.1/tcp/${config.ipfsPort2}/ws`
+        ],
+        API: `/ip4/127.0.0.1/tcp/${config.ipfsPort1}`,
+        Gateway: `/ip4/127.0.0.1/tcp/${config.ipfsPort2}`
+      }
+    }
+  }
+  // instantiating  ipfs node
+  ipfs = new IPFS(ipfsOptions)
   return ipfs
 }
 
@@ -42,12 +52,12 @@ async function getContent (ipfsNode, hash) {
         if (file.type === 'file') {
           // Is File
           fs.writeFile(`${pathStore}${file.path}`, file.content, err => {
-            // if (err) console.log(err)
+            if (err) console.log(err)
           })
         } else if (file.type === 'dir') {
           // Is Folder
           fs.mkdir(`${pathStore}${file.path}`, { recursive: true }, err => {
-            // if (err) console.log(err)
+            if (err) console.log(err)
           })
         }
       })
