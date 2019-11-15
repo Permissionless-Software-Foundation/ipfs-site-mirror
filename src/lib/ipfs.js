@@ -3,12 +3,9 @@ const fs = require('fs')
 const config = require('../../config')
 
 let ipfs
-let localStorage
-// init local storage
-if (typeof localStorage === 'undefined' || localStorage === null) {
-  const LocalStorage = require('node-localstorage').LocalStorage
-  localStorage = new LocalStorage('./localStorage')
-}
+
+const em = require('./utils/eventJS')
+
 async function startIPFS () {
   // starting ipfs node
   console.log('Starting...!')
@@ -41,17 +38,18 @@ async function startIPFS () {
   }
   // instantiating  ipfs node
   ipfs = new IPFS(ipfsOptions)
+  em.emit('test')
   return ipfs
 }
 
 // Get the latest content from the IPFS network and Add into ipfs-data.
 async function getContent (ipfsNode, hash) {
-  localStorage.setItem('ipfsDownloading', true)
+  em.emit('download-start')
   // Get the latest content from the IPFS network.
   return new Promise((resolve, reject) => {
     ipfsNode.get(hash, async function (err, files) {
       if (err) {
-        localStorage.setItem('ipfsDownloading', false)
+        em.emit('download-stop')
         reject(err)
       }
 
@@ -67,7 +65,7 @@ async function getContent (ipfsNode, hash) {
           fs.mkdirSync(`${pathStore}${file.path}`, { recursive: true })
         }
       })
-      localStorage.setItem('ipfsDownloading', false)
+      em.emit('download-stop')
       resolve(true)
     })
   })
@@ -88,4 +86,4 @@ async function pinAdd (ipfsNode, hash) {
     }) */
 }
 
-module.exports = { startIPFS, getContent, pinAdd }
+module.exports = { startIPFS, getContent, pinAdd, ipfs }
