@@ -1,39 +1,57 @@
 const IPFS = require('ipfs')
 const fs = require('fs')
+const config = require('../../config')
+
 let ipfs
+
+const em = require('./utils/eventJS')
 
 async function startIPFS () {
   // starting ipfs node
   console.log('Starting...!')
-  ipfs = new IPFS({
+  const ipfsOptions = {
     repo: './ipfs-data/ipfs-config/node',
     start: true,
     EXPERIMENTAL: {
       pubsub: true
     },
-    // config: {
-    //   Addresses: {
-    //     Swarm: ["/ip4/0.0.0.0/tcp/8006", "/ip4/127.0.0.1/tcp/8007/ws"],
-    //     API: "/ip4/127.0.0.1/tcp/8008",
-    //     Gateway: "/ip4/127.0.0.1/tcp/8009"
-    //   }
-    // },
     relay: {
       enabled: true, // enable circuit relay dialer and listener
       hop: {
         enabled: true // enable circuit relay HOP (make this node a relay)
       }
     }
-  })
+  }
+  if (config.ipfsPort1 && typeof config.ipfsPort1 === 'number' &&
+  config.ipfsPort2 && typeof config.ipfsPort2 === 'number') {
+    // Adding ports to ipfs config
+    ipfsOptions.config = {
+      Addresses: {
+        Swarm: [
+          `/ip4/0.0.0.0/tcp/${config.ipfsPort1}`,
+          `/ip4/127.0.0.1/tcp/${config.ipfsPort2}/ws`
+        ],
+        API: `/ip4/127.0.0.1/tcp/${config.ipfsPort1}`,
+        Gateway: `/ip4/127.0.0.1/tcp/${config.ipfsPort2}`
+      }
+    }
+  }
+  // instantiating  ipfs node
+  ipfs = new IPFS(ipfsOptions)
+  em.emit('test')
   return ipfs
 }
 
 // Get the latest content from the IPFS network and Add into ipfs-data.
 async function getContent (ipfsNode, hash) {
+  em.emit('download-start')
   // Get the latest content from the IPFS network.
   return new Promise((resolve, reject) => {
     ipfsNode.get(hash, async function (err, files) {
-      if (err) reject(err)
+      if (err) {
+        em.emit('download-stop')
+        reject(err)
+      }
 
       const pathStore = `${process.cwd()}/ipfs-data/` // Path to store new ipfs-data
       files.forEach(async file => {
@@ -41,16 +59,13 @@ async function getContent (ipfsNode, hash) {
         //  console.log(file)
         if (file.type === 'file') {
           // Is File
-          fs.writeFile(`${pathStore}${file.path}`, file.content, err => {
-            // if (err) console.log(err)
-          })
+          fs.writeFileSync(`${pathStore}${file.path}`, file.content)
         } else if (file.type === 'dir') {
           // Is Folder
-          fs.mkdir(`${pathStore}${file.path}`, { recursive: true }, err => {
-            // if (err) console.log(err)
-          })
+          fs.mkdirSync(`${pathStore}${file.path}`, { recursive: true })
         }
       })
+      em.emit('download-stop')
       resolve(true)
     })
   })
@@ -71,4 +86,4 @@ async function pinAdd (ipfsNode, hash) {
     }) */
 }
 
-module.exports = { startIPFS, getContent, pinAdd }
+module.exports = { startIPFS, getContent, pinAdd, ipfs }

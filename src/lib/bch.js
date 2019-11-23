@@ -37,13 +37,12 @@ class BCH {
   // hash is detected, it returns the hash. Otherwise, it returns false.
   async checkForUpdates () {
     const hash = await _this.findHash()
-
     // Handle initializing the server.
     if (_this.currentHash === '') _this.currentHash = hash
 
     // If new hash is detected.
     if (hash !== _this.currentHash) {
-      this.currentHash = hash
+      _this.currentHash = hash
 
       return hash
     }

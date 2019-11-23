@@ -5,6 +5,8 @@
 
 module.exports = {
   port: process.env.PORT || 3210,
-  BCHADDR: `bitcoincash:qzx5w7zqm5geykxaydvfpctxf9qklv4ylg7wwxckkg`,
-  stateFileName: `state.json`
+  BCHADDR: `bitcoincash:qr7u857krgsvq0dwe8rzlt5rcx35r6hnmu6glavtx0`,
+  stateFileName: `state.json`,
+  ipfsPort1: 4002,
+  ipfsPort2: 4003
 }
