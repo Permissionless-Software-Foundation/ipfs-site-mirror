@@ -51,7 +51,7 @@ async function manageServer () {
       console.log(`Exiting`)
       process.exit()
     }
-    console.log('Downloading last content')
+    console.log(`Downloading content associated with this IPFS hash: ${hash}`)
     await ipfsGet(hash)
 
     try {
@@ -109,10 +109,13 @@ async function initServer () {
     pid = server.pid
   }
 }
+
+// Get content from the IPFS network.
 async function ipfsGet (hash) {
   // Get the latest content from the IPFS network and Add into ipfs-data.
   await ipfs.getContent(ipfsNode, hash)
-  console.log(`Updated content.!`)
+  console.log(`Updated content!`)
+
   // Adds an IPFS object to the pinset and also stores it to the IPFS repo.
   await ipfs.pinAdd(ipfsNode, hash)
   console.log(`New content published with hash ${hash}`)
