@@ -36,7 +36,8 @@ async function startIPFS () {
         Addresses: {
           Swarm: [
             `/ip4/0.0.0.0/tcp/${config.ipfsPort1}`,
-            `/ip4/127.0.0.1/tcp/${config.ipfsPort2}/ws`
+            `/ip4/127.0.0.1/tcp/${config.ipfsPort2}/ws`,
+            `/ip4/127.0.0.1/tcp/4001/ipfs/QmbgP7nmMsqCxVEkywt8aSdyoBL9hYNyP1Uw97cVhThn3L`
           ],
           API: `/ip4/127.0.0.1/tcp/${config.ipfsPort1}`,
           Gateway: `/ip4/127.0.0.1/tcp/${config.ipfsPort2}`
