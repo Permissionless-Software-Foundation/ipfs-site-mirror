@@ -34,53 +34,53 @@ let ipfsNode
 async function manageServer () {
   ipfsNode = await ipfs.startIPFS()
 
-  ipfsNode.on('ready', async () => {
-    console.log('IPFS is ready...!')
-    // Retrieve hash from BCH network and retrieve data from IPFS.
-    // p-retry library -If it doesn't find the hash on the first try
-    let hash = await bch.pRetryGetHash()
+  // ipfsNode.on('ready', async () => {
+  console.log('IPFS is ready...!')
+  // Retrieve hash from BCH network and retrieve data from IPFS.
+  // p-retry library -If it doesn't find the hash on the first try
+  let hash = await bch.pRetryGetHash()
 
-    // Exit if no hash is found.
-    if (!hash) {
-      console.log(
-        `Could not find IPFS hash associated with BCH address ${config.BCHADDR}`
-      )
-      console.log(
-        `Publish an IPFS hash using the memo-push tool before running this server.`
-      )
-      console.log(`Exiting`)
-      process.exit()
-    }
-    console.log(`Downloading content associated with this IPFS hash: ${hash}`)
-    await ipfsGet(hash)
+  // Exit if no hash is found.
+  if (!hash) {
+    console.log(
+      `Could not find IPFS hash associated with BCH address ${config.BCHADDR}`
+    )
+    console.log(
+      `Publish an IPFS hash using the memo-push tool before running this server.`
+    )
+    console.log(`Exiting`)
+    process.exit()
+  }
+  console.log(`Downloading content associated with this IPFS hash: ${hash}`)
+  await ipfsGet(hash)
 
-    try {
-      // Start the web server.
-      console.log('Start the web server.')
-      const server = shell.exec('node index.js', { async: true })
-      pid = server.pid
-      // console.log(`server : ${util.inspect(server)}`)
-      // console.log(`pid: ${server.pid}`)
+  try {
+    // Start the web server.
+    console.log('Start the web server.')
+    const server = shell.exec('node index.js', { async: true })
+    pid = server.pid
+    // console.log(`server : ${util.inspect(server)}`)
+    // console.log(`pid: ${server.pid}`)
 
-      let serverInterval = setInterval(initServer, PERIOD)
+    let serverInterval = setInterval(initServer, PERIOD)
 
-      // Checking if IPFS is downloading new content
-      em.on('download-start', () => {
-        console.log('Update Interval Stopped')
-        console.log('Downloading new content')
-        clearInterval(serverInterval)
-        serverInterval = null
-        // console.log(serverInterval)
-      })
-      em.on('download-stop', () => {
-        console.log('IPFS Download finished..!')
-        console.log('Resuming update interval')
-        serverInterval = setInterval(initServer, PERIOD)
-      })
-    } catch (err) {
-      console.error(err)
-    }
-  })
+    // Checking if IPFS is downloading new content
+    em.on('download-start', () => {
+      console.log('Update Interval Stopped')
+      console.log('Downloading new content')
+      clearInterval(serverInterval)
+      serverInterval = null
+      // console.log(serverInterval)
+    })
+    em.on('download-stop', () => {
+      console.log('IPFS Download finished..!')
+      console.log('Resuming update interval')
+      serverInterval = setInterval(initServer, PERIOD)
+    })
+  } catch (err) {
+    console.error(err)
+  }
+  // })
 }
 
 // Promise based sleep function:

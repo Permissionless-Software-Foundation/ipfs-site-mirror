@@ -8,7 +8,7 @@
 'use strict'
 
 // By default choose a local rest API.
-let RESTAPI = 'bchjs'
+let RESTAPI = 'fullstack.cash'
 
 // Override the RESTAPI setting if envronment variable is set.
 if (process.env.RESTAPI && process.env.RESTAPI !== '') {
@@ -23,10 +23,10 @@ const BCHJS = require('@chris.troutner/bch-js')
 const config = {}
 
 // Use bch-js but use it with the bitcoin.com infrastructure.
-if (RESTAPI === 'bchjs') {
+if (RESTAPI === 'fullstack.cash') {
   config.BCHLIB = BCHJS
-  config.MAINNET_REST = `https://api.bchjs.cash/v3/`
-  config.TESTNET_REST = `https://tapi.bchjs.cash/v3/`
+  config.MAINNET_REST = `https://api.fullstack.cash/v3/`
+  config.TESTNET_REST = `https://tapi.fullstack.cash/v3/`
   config.RESTAPI = 'bchjs'
 }
 

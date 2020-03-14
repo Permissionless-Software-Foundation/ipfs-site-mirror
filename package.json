@@ -1,5 +1,5 @@
 {
-  "name": "koa-ipfs-blog",
+  "name": "ipfs-web-server",
   "version": "1.0.0",
   "description": "Retrieve website data off IPFS and serve it.",
   "main": "index.js",
@@ -21,25 +21,25 @@
   "author": "Chris Troutner <chris.troutner@gmail.com>",
   "license": "MIT",
   "apidoc": {
-    "title": "koa-ipfs-blog",
+    "title": "ipfs-web-server",
     "url": "localhost:5000"
   },
-  "repository": "christroutner/koa-ipfs-blog",
+  "repository": "Permissionless-Software-Foundation/ipfs-web-server",
   "dependencies": {
-    "@chris.troutner/bch-js": "^2.1.0",
-    "glob": "^7.0.0",
-    "ipfs": "^0.38.1",
-    "kcors": "^2.2.1",
-    "koa": "^2.5.0",
-    "koa-bodyparser": "^4.2.0",
+    "@chris.troutner/bch-js": "^2.3.9",
+    "glob": "^7.1.6",
+    "ipfs": "^0.41.2",
+    "kcors": "^2.2.2",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.2.1",
     "koa-convert": "^1.2.0",
-    "koa-logger": "^3.1.0",
+    "koa-logger": "^3.2.1",
     "koa-mount": "^4.0.0",
-    "koa-router": "^7.0.1",
+    "koa-router": "^8.0.8",
     "koa-static": "^5.0.0",
-    "p-retry": "^4.1.0",
+    "p-retry": "^4.2.0",
     "shelljs": "^0.8.3",
-    "tree-kill": "^1.2.1"
+    "tree-kill": "^1.2.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
