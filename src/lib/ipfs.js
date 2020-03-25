@@ -6,7 +6,7 @@ let ipfs
 
 const em = require('./utils/eventJS')
 
-async function startIPFS () {
+async function startIPFS() {
   try {
     // starting ipfs node
     console.log('Starting...!')
@@ -55,34 +55,26 @@ async function startIPFS () {
   }
 }
 
-// Get the latest content from the IPFS network and Add into ipfs-data.
-async function getContent (ipfsNode, hash) {
-  try {
-    em.emit('download-start')
-    // Get the latest content from the IPFS network.
-    return new Promise((resolve, reject) => {
-      ipfsNode.get(hash, async function (err, files) {
-        if (err) {
-          em.emit('download-stop')
-          reject(err)
-        }
 
-        const pathStore = `${process.cwd()}/ipfs-data/` // Path to store new ipfs-data
-        files.forEach(async file => {
-          // Map files
-          //  console.log(file)
-          if (file.type === 'file') {
-            // Is File
-            fs.writeFileSync(`${pathStore}${file.path}`, file.content)
-          } else if (file.type === 'dir') {
-            // Is Folder
-            fs.mkdirSync(`${pathStore}${file.path}`, { recursive: true })
-          }
-        })
-        em.emit('download-stop')
-        resolve(true)
-      })
-    })
+async function getContent(ipfsNode, hash) {
+  try {
+    console.log("Starting Download")
+    const pathStore = `${process.cwd()}/ipfs-data/` // Path to store new ipfs-data
+
+    for await (const file of ipfsNode.get(hash)) {
+
+
+      if (file.type === 'file') {
+        for await (let chunk of file.content) {
+          fs.writeFileSync(`${pathStore}${file.path}`, chunk)
+
+        }
+      } else if (file.type === 'dir') {
+        // Is Folder
+        fs.mkdirSync(`${pathStore}${file.path}`, { recursive: true })
+
+      }
+    }
   } catch (err) {
     console.error(`Error in ipfs.js/getContent()`)
     throw err
@@ -90,7 +82,7 @@ async function getContent (ipfsNode, hash) {
 }
 // Adds an IPFS object to the pinset and also stores it to the IPFS repo.
 
-async function pinAdd (ipfsNode, hash) {
+async function pinAdd(ipfsNode, hash) {
   ipfsNode.pin.add(hash, function (err) {
     if (err) return err
   })

@@ -1,10 +1,10 @@
 const IPFS = require("ipfs");
 const shell = require('shelljs')
-
+const { globSource } = IPFS
 
 async function addFile() {
-    const ipfs_node = new IPFS({
-        repo: "./ipfs-data/ipfs-config/nodeUpload",
+    const ipfsOptions = {
+        repo: "../ipfs-data/ipfs-config/nodeUpload",
         start: true,
         EXPERIMENTAL: {
             pubsub: true
@@ -23,33 +23,37 @@ async function addFile() {
                 enabled: true // enable circuit relay HOP (make this node a relay)
             }
         }
-    });
+    };
 
-    ipfs_node.on("ready", async () => {
-        console.log('Ipfs Ready!')
+    const ipfs_node = await IPFS.create(ipfsOptions)
+    console.log('Node is ready to use but not started!')
 
-        ipfs_node.addFromFs('./util/ipfs-upload', { recursive: true }, (err, result) => {
-            if (err) { throw err }
-            if (result.length < 2) { throw "No files to load"; }
-            console.log(result)
-            const lastHash = result.length <= 2 ?
-                result[result.length - 1].hash : //For one file to upload
-                result[result.length - 2].hash
-            //   shell.exec(`export WIF=Kx5tAyoyrpvQuqjQ6S5pvB5TeGWqQbGGvkNYkoBZ3Dq3HD6kHQk4`)
-            shell.exec(`memo-push -p ${lastHash}`);
+    try {
+        await ipfs_node.start()
+        console.log('Node started!')
 
+        const path = './util/ipfs-upload'
 
+        const hashes = []
 
+        for await (const file of ipfs_node.add(globSource(path, { recursive: true }))) {
+            hashes.push(file.cid.toString())
+            console.log('Added file:', file.path, file.cid.toString())
+        }
 
+        const lastHash = hashes.length <= 2 ?
+            hashes[hashes.length - 1] : //For one file to upload
+            hashes[hashes.length - 2]
 
-        })
+        console.log("Publishing last hash : ", lastHash)
+        shell.exec(`memo-push -p ${lastHash}`);
+    } catch (error) {
+        console.error('ERROR!', error)
+    }
 
-
-    })
     process.stdin.resume();
-    /*  
-*/
 
 }
+
 addFile();
 
