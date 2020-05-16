@@ -31,11 +31,13 @@ let pid
 const em = require('./src/lib/utils/eventJS')
 
 let ipfsNode
+
+// This is the starting function.
 async function manageServer () {
   ipfsNode = await ipfs.startIPFS()
 
-  // ipfsNode.on('ready', async () => {
   console.log('IPFS is ready...!')
+
   // Retrieve hash from BCH network and retrieve data from IPFS.
   // p-retry library -If it doesn't find the hash on the first try
   let hash = await bch.pRetryGetHash()
@@ -51,6 +53,7 @@ async function manageServer () {
     console.log(`Exiting`)
     process.exit()
   }
+
   console.log(`Downloading content associated with this IPFS hash: ${hash}`)
   await ipfsGet(hash)
 
@@ -72,6 +75,7 @@ async function manageServer () {
       serverInterval = null
       // console.log(serverInterval)
     })
+
     em.on('download-stop', () => {
       console.log('IPFS Download finished..!')
       console.log('Resuming update interval')
@@ -80,7 +84,6 @@ async function manageServer () {
   } catch (err) {
     console.error(err)
   }
-  // })
 }
 
 // Promise based sleep function:

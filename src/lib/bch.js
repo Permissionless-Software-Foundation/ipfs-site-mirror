@@ -17,18 +17,25 @@ const ADDR = config.BCHADDR
 const STATE = require(`./state`)
 const state = new STATE()
 
-const TIMEOUT = 1000 // Timeout to retry get hash
-// const RETRIES = 1 // Amount retries to get hash
+// Delay between attempts to get the latest IPFS hash-link from the BCH blockchain.
+const TIMEOUT = 1000
+
 let _this
 class BCH {
   constructor (hash, retries) {
     this.bchjs = bchjs
     _this = this
+
     // By default make hash an empty string.
     _this.currentHash = ''
-    _this.retries = 5 // Amount retries to get hash
 
+    // Amount of times to retry getting the IPFS hash-link from the BCH blockchain
+    // before giving up.
+    _this.retries = 5 // Default value of 5.
+
+    // Override default retry value if overridden by caller.
     if (retries && retries > 0) _this.retries = retries
+
     // If user specified a hash to use, use that.
     if (hash && hash !== '') _this.currentHash = hash
   }
@@ -37,6 +44,7 @@ class BCH {
   // hash is detected, it returns the hash. Otherwise, it returns false.
   async checkForUpdates () {
     const hash = await _this.findHash()
+
     // Handle initializing the server.
     if (_this.currentHash === '') _this.currentHash = hash
 
@@ -57,6 +65,7 @@ class BCH {
       // Get details associated with this apps BCH address.
       const details = await _this.bchjs.Blockbook.balance(ADDR)
       console.log(`Retrieving transaction history for BCH address ${ADDR}`)
+
       // Extract the list of transaction IDs involving this address.
       const TXIDs = details.txids
       // console.log(`TXIDs: ${JSON.stringify(TXIDs, null, 2)}`)
@@ -147,9 +156,12 @@ class BCH {
       return false
     }
   }
-  // Retries to get hash
+
+  // Gets the latest IPFS hash. Will retry if it fails.
   async pRetryGetHash () {
+    // Try to retrieve the hash from the state file first.
     let hash = await _this.getHashFromState()
+
     try {
       hash = await pRetry(tryFindHash, {
         onFailedAttempt: async () => {
@@ -158,14 +170,21 @@ class BCH {
         },
         retries: _this.retries
       })
+
+      // Update thet state file with the new hash.
       await state.setLastHash(hash)
+
       return hash
     } catch (error) {
-      if (hash) { console.log(`Hash not found, setting the lash hash used : ${hash}`) }
+      if (hash) {
+        console.log(`Hash not found, setting the lash hash used : ${hash}`)
+      }
       return hash
       // console.log(error)
     }
   }
+
+  // Get the IPFS hash-link from the state file.
   async getHashFromState () {
     try {
       const lasth = await state.getLastHash()
