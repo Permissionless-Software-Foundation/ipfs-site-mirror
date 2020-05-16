@@ -1,9 +1,9 @@
 # Start the testnet server with the command 'docker-compose up -d'
 
-troutsblog:
+web-server:
   build: ./production/
   dockerfile: Dockerfile
-  container_name: psfoundation.cash
+  container_name: web-server
   ports:
     - "3210:3210"  # <host port>:<container port>
     - "4231:4002"  # IPFS
@@ -13,7 +13,7 @@ troutsblog:
 
 tor:
   image: goldy/tor-hidden-service
-  container_name: tor-psfoundation.cash
+  container_name: tor-server
   links:
     - troutsblog
   environment:
