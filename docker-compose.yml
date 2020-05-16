@@ -15,7 +15,7 @@ tor:
   image: goldy/tor-hidden-service
   container_name: tor-server
   links:
-    - troutsblog
+    - web-server
   environment:
       TROUTSBLOG_PORTS: 80:3210 # Map port to detected service
   volumes:
