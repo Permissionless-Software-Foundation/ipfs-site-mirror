@@ -6,7 +6,7 @@ let ipfs
 
 const em = require('./utils/eventJS')
 
-async function startIPFS() {
+async function startIPFS () {
   try {
     // starting ipfs node
     console.log('Starting...!')
@@ -55,24 +55,19 @@ async function startIPFS() {
   }
 }
 
-
-async function getContent(ipfsNode, hash) {
+async function getContent (ipfsNode, hash) {
   try {
-    console.log("Starting Download")
+    console.log('Starting Download')
     const pathStore = `${process.cwd()}/ipfs-data/` // Path to store new ipfs-data
 
     for await (const file of ipfsNode.get(hash)) {
-
-
       if (file.type === 'file') {
         for await (let chunk of file.content) {
           fs.writeFileSync(`${pathStore}${file.path}`, chunk)
-
         }
       } else if (file.type === 'dir') {
         // Is Folder
         fs.mkdirSync(`${pathStore}${file.path}`, { recursive: true })
-
       }
     }
   } catch (err) {
@@ -82,7 +77,7 @@ async function getContent(ipfsNode, hash) {
 }
 // Adds an IPFS object to the pinset and also stores it to the IPFS repo.
 
-async function pinAdd(ipfsNode, hash) {
+async function pinAdd (ipfsNode, hash) {
   ipfsNode.pin.add(hash, function (err) {
     if (err) return err
   })
