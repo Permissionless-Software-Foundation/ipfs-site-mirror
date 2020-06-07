@@ -1,6 +1,7 @@
 const IPFS = require('ipfs')
 const fs = require('fs')
 const config = require('../../config')
+const concat = require('it-concat')
 
 let ipfs
 
@@ -60,23 +61,43 @@ async function startIPFS () {
 }
 
 async function getContent (ipfsNode, hash) {
+  // Get the latest content from the IPFS network.
+  console.log('Starting Download')
   try {
-    console.log('Starting Download')
+    if (!hash || typeof hash !== 'string') {
+      throw new Error('Hash must be a string!')
+    }
     const pathStore = `${process.cwd()}/ipfs-data/` // Path to store new ipfs-data
-
+    const files = []
+    // iterate files
     for await (const file of ipfsNode.get(hash)) {
-      if (file.type === 'file') {
-        for await (let chunk of file.content) {
-          fs.writeFileSync(`${pathStore}${file.path}`, chunk)
-        }
-      } else if (file.type === 'dir') {
+      const path = `${pathStore}${file.path}`
+      files.push(file)
+
+      if (!file.content) {
         // Is Folder
-        fs.mkdirSync(`${pathStore}${file.path}`, { recursive: true })
+        if (file.type === 'dir') {
+          // create folder
+          fs.mkdirSync(path, { recursive: true })
+        }
+        continue
+      }
+
+      // BufferArray
+      const content = await concat(file.content)
+      // Get Buffer
+      const data = content.slice(0, content.length)
+
+      if (file.type === 'file') {
+        // create file
+        fs.writeFileSync(path, data)
       }
     }
-  } catch (err) {
-    console.error(`Error in ipfs.js/getContent()`)
-    throw err
+    return files
+  } catch (error) {
+    console.log('error downloading', error)
+    // wlogger.error('Error in lib/ipfs.js/getContent()')
+    throw error
   }
 }
 // Adds an IPFS object to the pinset and also stores it to the IPFS repo.
