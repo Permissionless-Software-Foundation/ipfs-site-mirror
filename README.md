@@ -1,59 +1,25 @@
 # ipfs-web-server
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/christroutner/koa-ipfs-blog.svg)](https://greenkeeper.io/)
-
 A light-weight web server that serves any website published to IPFS. It monitors a
 BCH address and automatically updates when new content is announced by that
 address.
 
-- [Here is a non-technical video](https://www.youtube.com/watch?v=RlNVyatwd5M) overview
-of how governments censor content on the internet, and how decentralized publishing
-tools can be used to circumvent it.
-
-- [Here is a walkthrough video](https://www.youtube.com/watch?v=Ez9YXpu_Chs&t=971s) of
-how to use this repository along with
-the [memo-push](https://github.com/Permissionless-Software-Foundation/memo-push) tool
-to publish a website in a decentralized, censorship-resistant way in order to
-leverage the [Streisand Effect](https://en.wikipedia.org/wiki/Streisand_effect).
-
-This is the server-side software that serves up content to users with a normal
-web browser. It works in conjunction with
-the [memo-push](https://github.com/christroutner/memo-push) publishing
-tool. Memo-push is used to announce new content via the BCH network. This
-software is used to retrieve that new content from the IPFS network and serve
-it to users. It also serves content directly to the Tor network as well, via a
-hidden service.
-
-This project was forked from the [koa-api-boilerplate](https://github.com/christroutner/koa-api-boilerplate)
-
-
-## Requirements
-* node __^10.15.1__
-* npm __^6.7.0__
+The purpose of this code repository is to enable **individuals** to leverage the [Streisand Effect](https://en.wikipedia.org/wiki/Streisand_effect) and mirror IPFS-based websites that may be threatened by censorship. Find out more at [UncensorablePublishing.com](https://uncensorablepublishing.com).
 
 ## Installation
 - Clone and install dependencies:
 ```bash
-git clone https://github.com/Permissionless-Software-Foundation/ipfs-web-server
-cd ipfs-web-server
+git clone https://github.com/Permissionless-Software-Foundation/ipfs-site-mirror
+cd ipfs-site-mirror
 npm install
 ```
 
-- [Install IPFS](https://docs.ipfs.io/introduction/install/) and ensure the
-daemon is running by executing `ipfs daemon`.
+- Add the Bitcoin Cash address for the site you want to mirror to the [config/env/common.js](./config/env/common.js). The app will use this address to detect changes to the site and download those updates.
 
-
-## Usage
-There are two forms of using this repository. **Development** is best for hacking
-and development of the server. **Production** packages the repository into a
-Docker container for easy deployment. It also adds a Tor docker container so
-that your website content can be accessed directly through Tor and the
-[Tor browser](https://www.torproject.org/download/).
-
+- `npm start`
 
 ### Development
-
-- Ensure the IPFS daemon is running.
+The installation instructions above are for the development version using node.js directly.
 
 - Add your BCH address
 to [the config file](config/env/common.js). This
@@ -61,7 +27,9 @@ should be the same address associated with your [memo.cash](http://memo.cash) pr
 
 - Start the server: `npm start`
 
-### Production
+### Docker
+It's also possible to run this application as a Docker container.
+
 It's assumed that you are starting with a fresh installation of Ubuntu
 18.04 LTS on a 64-bit machine.
 It's also assumed that you are installing as a
@@ -84,21 +52,6 @@ should be the same address associated with your [memo.cash](http://memo.cash) pr
 - Run the docker container: `docker-compose up`
 
 - Or, run the docker container in daemon mode: `docker-compose up -d`
-
-**Note:** It takes time for the container to crawl the IPFS peer-to-peer network
-and connect to peers, in order to find the initial content it wants to download.
-You can speed up this processes by pre-downloading the initial content into the
-`ipfs-data` directory. If working regularly with this software, consider forking
-this [ipfs-stay-connected](https://github.com/christroutner/ipfs-stay-connected)
-app to make uploading of IPFS content faster.
-
-**Note:** Your website will be able to be accessed directly over the Tor network.
-The .onion address for your website can be found in `keys/koa/hostname`.
-
-## IPFS
-v1.1.3 uploaded to IPFS:
-- Get it: `ipfs get QmULHyBTAHQxT9Rnd6n7bfnXCDFdcHtZQKM4Jn1JsSteUG`
-- Pin it: `ipfs pin add -r QmULHyBTAHQxT9Rnd6n7bfnXCDFdcHtZQKM4Jn1JsSteUG`
 
 
 ## License

@@ -10,14 +10,3 @@ webserver:
   volumes:
     - ./ipfs-data:/home/safeuser/ipfs-web-server/ipfs-data
   restart: always
-
-tor:
-  image: goldy/tor-hidden-service
-  container_name: tor-server
-  links:
-    - webserver
-  environment:
-      WEBSERVER_PORTS: 80:3210 # Map port to detected service
-  volumes:
-    - ./keys:/var/lib/tor/hidden_service/
-  restart: always

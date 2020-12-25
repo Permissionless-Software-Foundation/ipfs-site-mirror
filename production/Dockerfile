@@ -24,18 +24,18 @@ WORKDIR /home/safeuser
 
 # Clone the project.
 WORKDIR /home/safeuser
-RUN git clone https://github.com/Permissionless-Software-Foundation/ipfs-web-server
-WORKDIR /home/safeuser/ipfs-web-server
+RUN git clone https://github.com/Permissionless-Software-Foundation/ipfs-site-mirror
+WORKDIR /home/safeuser/ipfs-site-mirror
 #RUN git checkout unstable
 
 # Install dependencies
 RUN npm install
 
 # Alter the IPFS to a the mounted volume.
-RUN echo "export IPFS_PATH=/home/safeuser/ipfs-web-server/ipfs-data" >> /home/safeuser/.profile
+RUN echo "export IPFS_PATH=/home/safeuser/ipfs-site-mirror/ipfs-data" >> /home/safeuser/.profile
 
 # Declare the path to volumes for persisting data.
-VOLUME /home/safeuser/ipfs-web-server/ipfs-data
+VOLUME /home/safeuser/ipfs-site-mirror/ipfs-data
 
 # IPFS port
 EXPOSE 4001
