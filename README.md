@@ -1,6 +1,6 @@
 # ipfs-site-mirror
 
-A light-weight web server that serves any website published to IPFS. It monitors a
+A light-weight web server that mirrors any website published to IPFS. It monitors a
 BCH address and automatically updates when new content is announced by that
 address.
 
