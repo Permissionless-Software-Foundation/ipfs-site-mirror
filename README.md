@@ -6,6 +6,8 @@ address.
 
 The purpose of this code repository is to enable **individuals** to leverage the [Streisand Effect](https://en.wikipedia.org/wiki/Streisand_effect) and mirror IPFS-based websites that may be threatened by censorship. Find out more at [UncensorablePublishing.com](https://uncensorablepublishing.com).
 
+- [YouTube Video Introduction to ipfs-site-mirror](https://youtu.be/nrtVuk3v1R0)
+
 ## Installation
 - Clone and install dependencies:
 ```bash
