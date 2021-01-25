@@ -28,24 +28,20 @@ async function startIPFS () {
 
     if (
       config.ipfsPort1 &&
-      typeof config.ipfsPort1 === 'number' &&
-      config.ipfsPort2 &&
-      typeof config.ipfsPort2 === 'number'
+      config.ipfsPort2
     ) {
       // Adding ports to ipfs config
       ipfsOptions.config = {
         Addresses: {
           Swarm: [
-            `/ip4/0.0.0.0/tcp/${config.ipfsPort1}`,
-            `/ip4/127.0.0.1/tcp/${config.ipfsPort2}/ws`,
+            `/ip4/0.0.0.0/tcp/${Number(config.ipfsPort1)}`,
+            `/ip4/127.0.0.1/tcp/${Number(config.ipfsPort2)}/ws`,
             `/ip4/127.0.0.1/tcp/4001/ipfs/QmbgP7nmMsqCxVEkywt8aSdyoBL9hYNyP1Uw97cVhThn3L`,
             // Decatur store.
             `/dns/decatur.hopto.org/tcp/7700/ipfs/Qma7UL7kBPPukRXfvES89Ce772USyfUaYxaP3msKTdNcyJ`,
             // PSF IPFS Bootstrap Server
             `/ip4/116.203.193.74/tcp/4001/ipfs/QmNZktxkfScScnHCFSGKELH3YRqdxHQ3Le9rAoRLhZ6vgL`
-          ],
-          API: `/ip4/127.0.0.1/tcp/${config.ipfsPort1}`,
-          Gateway: `/ip4/127.0.0.1/tcp/${config.ipfsPort2}`
+          ]
         }
       }
     }
