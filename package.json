@@ -26,7 +26,7 @@
   },
   "repository": "Permissionless-Software-Foundation/ipfs-web-server",
   "dependencies": {
-    "@psf/bch-js": "^4.3.0",
+    "@psf/bch-js": "^4.6.0",
     "glob": "^7.1.6",
     "ipfs": "^0.52.3",
     "it-concat": "^1.0.0",
