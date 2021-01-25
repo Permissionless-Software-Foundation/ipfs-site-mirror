@@ -66,11 +66,23 @@ class BCH {
   async findHash () {
     try {
       // Get details associated with this apps BCH address.
-      const details = await _this.bchjs.Blockbook.balance(ADDR)
-      console.log(`Retrieving transaction history for BCH address ${ADDR}`)
+      // const details = await _this.bchjs.Blockbook.balance(ADDR)
+      // console.log(`Retrieving transaction history for BCH address ${ADDR}`)
+
+      let txHistory = await _this.bchjs.Electrumx.transactions(ADDR)
+      // console.log(`txHistory: ${JSON.stringify(txHistory, null, 2)}`)
+
+      // Sort the transactions in descending order (newest first).
+      txHistory = this.sortTxsByHeight(
+        txHistory.transactions,
+        'DESCENDING'
+      )
+      // console.log(`txHistory: ${JSON.stringify(txHistory, null, 2)}`)
 
       // Extract the list of transaction IDs involving this address.
-      const TXIDs = details.txids
+      // const TXIDs = details.txids
+      // console.log(`TXIDs: ${JSON.stringify(TXIDs, null, 2)}`)
+      const TXIDs = txHistory.map(elem => elem.tx_hash)
       // console.log(`TXIDs: ${JSON.stringify(TXIDs, null, 2)}`)
 
       // Loop through each transaction associated with this address.
@@ -106,6 +118,14 @@ class BCH {
       console.log(`Could not find IPFS hash in transaction history.`)
       return false
     }
+  }
+
+  // Sort the Transactions by the block height
+  sortTxsByHeight (txs, sortingOrder = 'ASCENDING') {
+    if (sortingOrder === 'ASCENDING') {
+      return txs.sort((a, b) => a.height - b.height)
+    }
+    return txs.sort((a, b) => b.height - a.height)
   }
 
   // Filters a string to see if it matches the proper pattern of:

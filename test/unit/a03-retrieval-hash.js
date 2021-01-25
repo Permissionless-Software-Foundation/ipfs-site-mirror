@@ -32,8 +32,8 @@ describe('#bch.js', () => {
   describe('findHash function', () => {
     it('Should retrieve hash', async () => {
       sandbox
-        .stub(bchjs.bchjs.Blockbook, 'balance')
-        .resolves(mockData.mockDetails)
+        .stub(bchjs.bchjs.Electrumx, 'transactions')
+        .resolves(mockData.mockElectruxTxs)
 
       sandbox
         .stub(bchjs.bchjs.RawTransactions, 'getRawTransaction')
@@ -49,7 +49,8 @@ describe('#bch.js', () => {
   describe('pRetryGetHash function', async function () {
     this.timeout(20000)
     it('Should use last hash from state.json if it exist', async () => {
-      sandbox.stub(bchjs.bchjs.Blockbook, 'balance').resolves({}) // mocks empty  for trhow error
+      // mocks empty  for throw error
+      sandbox.stub(bchjs.bchjs.Electrumx, 'transactions').resolves({})
 
       const lastHash = await state.getLastHash()
       const hash = await bchjs.pRetryGetHash()
@@ -61,8 +62,8 @@ describe('#bch.js', () => {
 
     it('Should Retrieve hash from pretry function', async () => {
       sandbox
-        .stub(bchjs.bchjs.Blockbook, 'balance')
-        .resolves(mockData.mockDetails)
+        .stub(bchjs.bchjs.Electrumx, 'transactions')
+        .resolves(mockData.mockElectruxTxs)
 
       sandbox
         .stub(bchjs.bchjs.RawTransactions, 'getRawTransaction')
